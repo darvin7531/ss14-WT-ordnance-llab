@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1016">
+  <meta name="description" content="Калькулятор кастомной взрывчатки и химии Space Stories CM14 / RMC14">
+  <title>Ordnance Lab — Space Stories CM14</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">OT</div>
+        <div><b>Ordnance Lab</b><span>Space Stories CM14</span></div>
+      </div>
+      <nav>
+        <a class="nav-link" data-route="quick" href="#/quick"><span>01</span><div><b>Быстрый расчёт</b><small>выбрал → собрал</small></div></a>
+        <a class="nav-link" data-route="builder" href="#/builder"><span>02</span><div><b>Конструктор</b><small>ручная смесь</small></div></a>
+        <a class="nav-link" data-route="combat" href="#/combat"><span>03</span><div><b>Бой с T3</b><small>реальный blast</small></div></a>
+        <a class="nav-link" data-route="chemistry" href="#/chemistry"><span>04</span><div><b>Химия</b><small>пошаговый крафт</small></div></a>
+        <a class="nav-link" data-route="reference" href="#/reference"><span>05</span><div><b>Справочник</b><small>как всё считается</small></div></a>
+      </nav>
+      <div class="sidebar-bottom">
+        <span id="buildBadge" class="build-badge">build</span>
+        <button id="resetApp" class="reset-btn">Сбросить данные</button>
+        <small>Статический сайт · работает без сервера</small>
+      </div>
+    </aside>
+
+    <header class="mobile-bar">
+      <button id="navToggle" class="menu-btn" aria-label="Меню">☰</button>
+      <div><b>Ordnance Lab</b><small>Space Stories CM14</small></div>
+    </header>
+
+    <main id="view" class="view" aria-live="polite"></main>
+  </div>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

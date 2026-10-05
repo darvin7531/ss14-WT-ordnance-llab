@@ -1,0 +1,12 @@
+{
+  "name": "Ordnance Lab — Space Stories CM14",
+  "short_name": "Ordnance Lab",
+  "description": "Калькулятор кастомной взрывчатки, химии и blast damage для Space Stories CM14",
+  "start_url": "./#/quick",
+  "display": "standalone",
+  "background_color": "#0b1016",
+  "theme_color": "#0b1016",
+  "icons": [
+    {"src":"./assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
