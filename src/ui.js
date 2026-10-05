@@ -2,7 +2,7 @@ import { CASINGS, CHEMS, PRESETS } from './data.js';
 import { calculateStats, engineParams, fmt, packFinalBeakers } from './engine/ordnance.js';
 import { simulateOpenGrid, maxCardinalReach } from './engine/explosion.js';
 import { analyzeIngredients } from './engine/ingredients.js';
-import { CHEM_DETAILS, effectParts } from './chem-info.js';
+import { CHEM_DETAILS, effectParts, fireEntityLabel } from './chem-info.js';
 
 export function escapeHtml(v=''){
   return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -30,7 +30,8 @@ export function statStrip(state){
     ${metric('Охват',`${maxCardinalReach(sim)} тайл.`,'по прямой, open-grid')}
     ${metric('Осколки',fmt(stats.shards),'25 Piercing / AP20')}
     ${metric('Огонь',stats.fireActual.intensity?`${stats.fireActual.intensity}/${stats.fireActual.radius}/${stats.fireActual.duration}`:'—','int / radius / sec')}
-    ${metric('Цвет',stats.fireColor?`<span class="metric-color"><i style="background:${stats.fireColor}"></i>${stats.fireColor}</span>`:'—','взвешенный BurnColor')}
+    ${metric('Тип огня',stats.fireActual.intensity?fireEntityLabel(stats.fireEntity,stats.firePenetrating):'—',stats.fireColor?'weighted цвет может переопределить special entity':'FireEntity')}
+    ${metric('Цвет',stats.fireColor?`<span class="metric-color"><i style="background:${stats.fireColor}"></i>${stats.fireColor}</span>`:'—','только burncolormod > 0')}
   </div>`;
 }
 
@@ -83,21 +84,25 @@ export function heatmapHtml(sim,{selected={x:2,y:0},size=9,clickable=true,showDa
 
 export function ingredientBreakdown(state,{title='Зачем здесь каждый компонент'}={}){
   const rows=analyzeIngredients(state.casing,state.mix,{blastDampener:state.blastDampener});
+  const zeroRows=rows.filter(x=>x.usefulness==='cosmetic'||x.usefulness==='wasted');
   return `<section class="panel ingredient-panel">
     <div class="panel-head">
-      <div><span class="eyebrow">разбор смеси</span><h2>${title}</h2><p>Сверху — что реагент умеет в принципе. Ниже — что он <b>реально меняет именно в этой смеси</b> после cap, min Falloff и целочисленного fire.</p></div>
+      <div><span class="eyebrow">разбор смеси</span><h2>${title}</h2><p>Сверху — что реагент умеет в принципе. Ниже — что он <b>реально меняет именно в этой смеси</b> после cap, min Falloff и целочисленного fire. Проверка идёт по одному компоненту: остальные остаются на месте.</p></div>
       <a class="text-link" href="#/reagents">Полный справочник реагентов →</a>
     </div>
+    ${zeroRows.length?`<div class="callout warn"><b>Кандидаты на замену:</b> ${zeroRows.map(x=>`${x.chem.name} ${fmt(x.u)}u`).join(', ')}. Каждый из них <b>по отдельности</b> сейчас можно убрать без изменения Power/Falloff/Fire/Shards; визуальный цвет может измениться. Не удаляй все сразу без повторной проверки.</div>`:''}
     <div class="ingredient-grid">
       ${rows.map(x=>{
         const d=CHEM_DETAILS[x.id]||{};
         const eff=[];
         if(Math.abs(x.effective.power)>1e-6)eff.push(`Power +${fmt(x.effective.power)}`);
-        if(Math.abs(x.effective.falloff)>1e-6)eff.push(`Falloff −${fmt(x.effective.falloff)}`);
+        if(Math.abs(x.effective.falloff)>1e-6)eff.push(`Falloff ${x.effective.falloff>0?'−':'+'}${fmt(Math.abs(x.effective.falloff))}`);
         if(Math.abs(x.effective.intensity)>1e-6)eff.push(`Fire I ${x.effective.intensity>0?'+':''}${fmt(x.effective.intensity)}`);
         if(Math.abs(x.effective.radius)>1e-6)eff.push(`Fire R ${x.effective.radius>0?'+':''}${fmt(x.effective.radius)}`);
         if(Math.abs(x.effective.duration)>1e-6)eff.push(`Fire D ${x.effective.duration>0?'+':''}${fmt(x.effective.duration)}`);
         if(Math.abs(x.effective.shards)>1e-6)eff.push(`осколки +${fmt(x.effective.shards)}`);
+        if(x.fireEntityChanged)eff.push(`тип огня → ${fireEntityLabel(x.baseFireEntity,x.chem.firePenetrating)}`);
+        if(x.colorChanged&&x.finalColor)eff.push(`цвет → ${x.finalColor}`);
         const status=x.usefulness==='useful'?'useful':x.usefulness==='partial'?'partial':x.usefulness==='cosmetic'?'cosmetic':'wasted';
         const statusText={useful:'работает полностью',partial:'часть уходит в cap',cosmetic:'в основном косметика',wasted:'боевого вклада нет'}[status];
         return `<article class="ingredient-card ${status}">

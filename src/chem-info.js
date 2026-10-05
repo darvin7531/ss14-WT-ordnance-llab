@@ -129,10 +129,10 @@ export const CHEM_DETAILS = {
   },
   napalm:{
     role:'Универсальный fire-модификатор',
-    summary:'Хорошо двигает сразу три параметра пожара.',
-    how:'С учётом Oxidizing/Fueling/Flowing: 1u ≈ +0.45 Intensity, +0.06 Radius, +0.75 Duration.',
+    summary:'Хорошо двигает сразу три параметра пожара и сам по себе выбирает RMCTileFireNapalmBase.',
+    how:'С учётом Oxidizing/Fueling/Flowing: 1u ≈ +0.45 Intensity, +0.06 Radius, +0.75 Duration. Поля топлива intensity/duration/radius не складываются в custom ordnance напрямую.',
     use:'Если нужен сбалансированный пожар и есть время на производство.',
-    avoid:'Базовые поля fuel intensity/duration/radius не прибавляются напрямую к custom ordnance — важны именно модификаторы.',
+    avoid:'Если другой реагент создаёт weighted BurnColor, сервер может заменить специальный napalm FireEntity на STTileFireDynamic. «Краска» иногда меняет механику, а не только вид.',
   },
   napalm_sticky:{
     role:'Специальное топливо',
@@ -154,6 +154,13 @@ export const CHEM_DETAILS = {
     how:'Oxidizing potency 9: 1u = +1.8 Intensity, −0.09 Radius, −0.9 Duration.',
     use:'Когда Duration/Radius уже с запасом и нужно быстро добрать Intensity.',
     avoid:'Требует аккуратной варки с водой первой; остаточные хлор+фтор могут запустить bad-reaction.',
+  },
+  copper:{
+    role:'Краситель огня',
+    summary:'Почти чисто косметический реагент: красит итоговый dynamic-fire в зелёный, но не добавляет Power/Intensity/Radius/Duration.',
+    how:'Прямых боевых modifiers нет. BurnColor #78be5a имеет вес 4, поэтому медь заметно тянет итоговый смешанный цвет в зелёную сторону.',
+    use:'Когда нужен именно зелёный визуальный цвет обычного dynamic-fire.',
+    avoid:'Не путай визуально зелёный dynamic-fire с RMCTileFireGreen: медь НЕ даёт slow или xeno armor modifier. Weighted BurnColor также способен заменить специальный FireEntity на STTileFireDynamic.',
   },
   iron:{
     role:'Шрапнель',
@@ -184,9 +191,12 @@ export const CHEM_DETAILS = {
 
   frost_oil:{role:'Скрыт',summary:'Старый/спорный путь Paraformaldehyde.',how:'В текущем рабочем OT-техдреве не нужен: Paraformaldehyde делается в Industry Freezer.',use:'Не нужен для штатного Octogen-chain.',avoid:'Не путать с обычным FrostOil из Chilly Pepper.'},
   napalm_ut:{role:'Скрыт',summary:'Специальное огнемётное топливо.',how:'Не подтверждён надёжный штатный путь извлечения свободной жидкости в мензурку.',use:'Справочная запись.',avoid:'Не строить рабочий OT-рецепт вокруг закрытого flamer tank.'},
-  bgel:{role:'Скрыт',summary:'Специальное зелёное огнемётное топливо.',how:'Найдено в закрытом flamer tank.',use:'Справочная запись.',avoid:'Не считать доступным свободным реагентом OT.'},
-  napalm_b:{role:'Скрыт',summary:'Специальное огнемётное топливо.',how:'Найдено в закрытом flamer tank.',use:'Справочная запись.',avoid:'Не считать доступным свободным реагентом OT.'},
-  napalm_x:{role:'Скрыт',summary:'Специальное синее огнемётное топливо.',how:'Найдено в закрытом flamer tank.',use:'Справочная запись.',avoid:'Не считать доступным свободным реагентом OT.'},
+  bgel:{role:'Скрыт · special fire',summary:'Потенциально выбирает RMCTileFireGreen.',how:'Custom modifier как у базового напалма: ≈ +0.45 I / +0.06 R / +0.75 D на 1u. Green fire замедляет ×0.666 и использует armorMultiplier 0.5 против Xeno.',use:'Справочно: anti-xeno fire.',avoid:'Не считать штатно доступным OT. Weighted BurnColor в смеси способен заменить Green FireEntity на STTileFireDynamic.'},
+  napalm_b:{role:'Скрыт · special fire',summary:'Потенциально выбирает RMCTileFireGreen и имеет fireSpread.',how:'Стат-модификатор базового напалма; special green tile-fire даёт slow/armor interaction против Xeno.',use:'Справочная запись.',avoid:'Не считать доступным свободным реагентом OT; цветовые добавки способны переопределить FireEntity.'},
+  napalm_x:{role:'Скрыт · special fire',summary:'Потенциально выбирает RMCTileFireBlue.',how:'Стат-модификатор базового напалма. Blue fire имеет maxStacks 40.',use:'Справочно: high-stack fire.',avoid:'Не считать доступным свободным реагентом OT; weighted BurnColor может заменить special entity.'},
+  napalm_e:{role:'Скрыт · penetrating fire',summary:'Napalm E несёт RMCFireImmunityBypass.',how:'Custom modifier как у базового напалма плюс FirePenetrating=true.',use:'Справочно: огонь, способный обходить обычный tile-fire immunity.',avoid:'Штатный источник свободного реагента для OT не подтверждён.'},
+  napalm_ex:{role:'Скрыт · penetrating fire',summary:'Усиленный penetrating fire prototype.',how:'Additive modifiers как у базового напалма; главное отличие — penetrating FireEntity/flag, а не поле intensity:40.',use:'Справочная запись.',avoid:'Штатный источник свободного реагента для OT не подтверждён.'},
+  r189:{role:'Скрыт · penetrating fire',summary:'Специальный penetrating fire prototype.',how:'В custom ordnance числовые modifiers идут от базового напалма; intensity:50 самого fire entity не означает +50 к корпусу.',use:'Справочная запись.',avoid:'Штатный источник свободного реагента для OT не подтверждён.'},
 };
 
 export function effectParts(id){
@@ -199,6 +209,8 @@ export function effectParts(id){
   if(c.r)parts.push({key:'radius',label:`Fire R ${signed(c.r)} /u`,tone:c.r>0?'good':'warn'});
   if(c.d)parts.push({key:'duration',label:`Fire D ${signed(c.d)} /u`,tone:c.d>0?'good':'warn'});
   if(c.shrapnel)parts.push({key:'shrapnel',label:'4u = 1 AP-осколок',tone:'frag'});
+  if(c.firePenetrating)parts.push({key:'penetrating',label:'penetrating fire',tone:'fire'});
+  if(c.fireEntity && c.fireEntity!=='RMCTileFire')parts.push({key:'entity',label:`FireEntity: ${fireEntityLabel(c.fireEntity,c.firePenetrating)}`,tone:'fire'});
   if(c.burnColor && c.burnWeight>0)parts.push({key:'color',label:`цвет ×${c.burnWeight}`,tone:'color'});
   if(!parts.length)parts.push({key:'none',label:'нет прямого ordnance-вклада',tone:'muted'});
   return parts;
@@ -216,4 +228,26 @@ export function directSource(id){
 export function signed(v){
   if(!v)return '0';
   return `${v>0?'+':''}${Number(v.toFixed(3))}`;
+}
+
+
+export const FIRE_ENTITY_NAMES={
+  RMCTileFire:'обычный tile-fire',
+  RMCTileFireEthanol:'этаноловый огонь',
+  RMCTileFireNapalmBase:'базовый напалм',
+  RMCTileFireStickyNapalm:'липкий напалм',
+  RMCTileFireHCNapalm:'HC-напалм',
+  RMCTileFireGreen:'зелёный anti-xeno fire',
+  RMCTileFireBlue:'синий high-stack fire',
+  RMCTileFireNapalmE:'Napalm E · immunity bypass',
+  RMCTileFireNapalmEX:'Napalm EX · immunity bypass',
+  RMCTileFireR189:'R189 · immunity bypass',
+  STTileFireDynamic:'динамический обычный огонь',
+  STTileFireDynamicPenetrating:'динамический penetrating fire',
+};
+
+export function fireEntityLabel(entity,penetrating=false){
+  if(!entity)return '—';
+  const name=FIRE_ENTITY_NAMES[entity]||entity;
+  return penetrating && !name.includes('bypass') && !name.includes('penetrating') ? name+' · penetrating' : name;
 }

@@ -1,4 +1,4 @@
-const CACHE='ordnance-lab-v12-2';
+const CACHE='ordnance-lab-v12-3';
 const ASSETS=[
   './','./index.html','./404.html','./manifest.webmanifest','./assets/app.css','./assets/icon.svg',
   './src/app.js','./src/data.js','./src/state.js','./src/router.js','./src/ui.js','./src/chem-info.js',

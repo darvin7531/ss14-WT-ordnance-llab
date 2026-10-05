@@ -31,6 +31,7 @@ export function calculateStats(casingId, mix, {blastDampener=false, vesselParts=
   let powerRaw=f32(0), falloffRaw=f32(casing.baseFalloff);
   let fireIntensityRaw=f32(0), fireRadiusRaw=f32(0), fireDurationRaw=f32(0);
   let colorR=0,colorG=0,colorB=0,colorWeight=0;
+  let fireEntity='RMCTileFire', firePenetrating=false;
   let ironTotal=0;
 
   for(const {chem,u} of rows){
@@ -41,6 +42,8 @@ export function calculateStats(casingId, mix, {blastDampener=false, vesselParts=
     fireIntensityRaw=f32(fireIntensityRaw + f32(q*f32(c.i)));
     fireRadiusRaw=f32(fireRadiusRaw + f32(q*f32(c.r)));
     fireDurationRaw=f32(fireDurationRaw + f32(q*f32(c.d)));
+    if(c.fireEntity && c.fireEntity!=='RMCTileFire') fireEntity=c.fireEntity;
+    firePenetrating ||= !!c.firePenetrating;
     if(c.burnColor && c.burnWeight>0){
       const rgb=hexToRgb(c.burnColor);
       const w=Math.max(u,1)*c.burnWeight;
@@ -84,13 +87,16 @@ export function calculateStats(casingId, mix, {blastDampener=false, vesselParts=
   const fireShape = fireActual.intensity>30 && casing.allowStarShape ? 'star' : (fireActual.intensity>0?'diamond':'none');
   const fireRayRange = fireShape==='star' ? Math.min(roundToEven(f32(fireRadius*1.5)), Math.trunc(casing.fire.r[1])) : 0;
   const fireColor=colorWeight>0?rgbToHex(colorR/colorWeight,colorG/colorWeight,colorB/colorWeight):null;
+  // Точно как сервер: итоговый weighted BurnColor заменяет special FireEntity на Stories dynamic fire.
+  if(fireActual.intensity>0 && fireColor) fireEntity=firePenetrating?'STTileFireDynamicPenetrating':'STTileFireDynamic';
+  if(fireActual.intensity<=0){fireEntity='RMCTileFire';firePenetrating=false;}
 
   return {
     casingId,casing,rows,volume:rows.reduce((a,x)=>a+x.u,0),
     powerRaw,power,falloffRaw,falloffBeforeDamp,falloff,blastDampener,
     shards,ironTotal,
     fireIntensityRaw,fireRadiusRaw,fireDurationRaw,
-    fireIntensity,fireRadius,fireDuration,fireActual,fireShape,fireRayRange,fireColor,
+    fireIntensity,fireRadius,fireDuration,fireActual,fireShape,fireRayRange,fireColor,fireEntity,firePenetrating,
   };
 }
 

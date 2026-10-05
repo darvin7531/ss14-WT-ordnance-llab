@@ -3,6 +3,7 @@ export const SOURCE = {
   commit: 'a85baeafd79b5c07fd64aad1196a6258dd8b6e25',
   shortCommit: 'a85baeaf',
   checkedAt: '2026-10-05',
+  appVersion: '12.2',
 };
 
 export const CASINGS = {
@@ -67,7 +68,7 @@ export const CHEMS = {
 
   welding_fuel:{name:'Сварочное топливо',proto:'RMCWeldingFuel',group:'Огненные / модификаторы',p:.12,f:-.1,i:.1,r:-.08,d:.7,stock:true},
   phosphorus:{name:'Фосфор',proto:'RMCPhosphorus',group:'Огненные / модификаторы',p:0,f:0,i:1,r:-.12,d:.1,burnColor:'#ffdba4',burnWeight:5},
-  ethanol:{name:'Этанол',proto:'RMCEthanol',group:'Огненные / модификаторы',p:0,f:0,i:.2,r:.1,d:.2,burnColor:'#6897f7',burnWeight:2},
+  ethanol:{name:'Этанол',proto:'RMCEthanol',group:'Огненные / модификаторы',p:0,f:0,i:.2,r:.1,d:.2,burnColor:'#6897f7',burnWeight:2,fireEntity:'RMCTileFireEthanol'},
   carbon:{name:'Углерод',proto:'RMCCarbon',group:'Огненные / модификаторы',p:0,f:0,i:0,r:0,d:1,burnColor:'#ffd700',burnWeight:3},
   hydrogen:{name:'Водород',proto:'RMCHydrogen',group:'Огненные / модификаторы',p:.15,f:0,i:-.5,r:.2,d:-.5,stock:true,burnColor:'#b6f8ff',burnWeight:2},
   oxygen:{name:'Кислород',proto:'RMCOxygen',group:'Огненные / модификаторы',p:0,f:0,i:1.15,r:-.10,d:-.2,stock:true,burnColor:'#58daff',burnWeight:2},
@@ -77,9 +78,9 @@ export const CHEMS = {
   hexamine:{name:'Гексамин',proto:'RMCHexamine',group:'Огненные / модификаторы',p:0,f:0,i:0,r:0,d:.5,recipe:'hexamine'},
   lithium:{name:'Литий',proto:'RMCLithium',group:'Огненные / модификаторы',p:0,f:0,i:.35,r:-.01,d:-.1,burnColor:'#ff356f',burnWeight:5},
   table_salt:{name:'Столовая соль',proto:'RMCTableSalt',group:'Огненные / модификаторы',p:0,f:0,i:.1,r:0,d:0,burnColor:'#ffff00',burnWeight:2},
-  napalm:{name:'Напалм',proto:'RMCNapalm',group:'Огненные / модификаторы',p:0,f:0,i:.45,r:.06,d:.75,recipe:'napalm'},
-  napalm_sticky:{name:'Липкий напалм',proto:'RMCNapalmSticky',group:'Огненные / модификаторы',p:0,f:0,i:-1.05,r:-.44,d:-4.25,recipe:'napalm_sticky'},
-  napalm_hc:{name:'Высокогорючий напалм',proto:'RMCNapalmHighCombustion',group:'Огненные / модификаторы',p:0,f:0,i:-4.05,r:-.44,d:-.25,recipe:'napalm_hc'},
+  napalm:{name:'Напалм',proto:'RMCNapalm',group:'Огненные / модификаторы',p:0,f:0,i:.45,r:.06,d:.75,recipe:'napalm',fireEntity:'RMCTileFireNapalmBase'},
+  napalm_sticky:{name:'Липкий напалм',proto:'RMCNapalmSticky',group:'Огненные / модификаторы',p:0,f:0,i:-1.05,r:-.44,d:-4.25,recipe:'napalm_sticky',fireEntity:'RMCTileFireStickyNapalm'},
+  napalm_hc:{name:'Высокогорючий напалм',proto:'RMCNapalmHighCombustion',group:'Огненные / модификаторы',p:0,f:0,i:-4.05,r:-.44,d:-.25,recipe:'napalm_hc',fireEntity:'RMCTileFireHCNapalm'},
   clf3:{name:'Трифторид хлора',proto:'RMCCLF3',group:'Огненные / модификаторы',p:0,f:0,i:1.8,r:-.09,d:-.9,recipe:'clf3'},
   iron:{name:'Железо',proto:'RMCIron',group:'Огненные / модификаторы',p:0,f:0,i:0,r:0,d:0,shrapnel:true},
   copper:{name:'Медь',proto:'RMCCopper',group:'Огненные / модификаторы',p:0,f:0,i:0,r:0,d:0,burnColor:'#78be5a',burnWeight:4},
@@ -101,9 +102,12 @@ export const CHEMS = {
   // Оставлены только как справочная информация, в конструктор не попадают.
   frost_oil:{name:'RMC морозное масло',proto:'RMCFrostOil',group:'Недоступные / спорные',p:0,f:0,i:0,r:0,d:0,available:false,unavailableReason:'Рабочий путь OT использует промышленную морозилку; штатный источник RMCFrostOil не найден.'},
   napalm_ut:{name:'Топливо СГ-Нафталин',proto:'RMCNapalmUT',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,available:false,unavailableReason:'Не подтверждён надёжный способ получить как свободный реагент в мензурке.'},
-  bgel:{name:'Напалм Б-Гель',proto:'RMCBGel',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,available:false,unavailableReason:'Найден в закрытом flamer tank, не как свободная химия.'},
-  napalm_b:{name:'Напалм Б',proto:'RMCNapalmB',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,available:false,unavailableReason:'Найден в закрытом flamer tank.'},
-  napalm_x:{name:'Напалм X',proto:'RMCNapalmX',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,available:false,unavailableReason:'Найден в закрытом flamer tank.'},
+  bgel:{name:'Напалм Б-Гель',proto:'RMCBGel',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,fireEntity:'RMCTileFireGreen',available:false,unavailableReason:'Найден в закрытом flamer tank, не как свободная химия.'},
+  napalm_b:{name:'Напалм Б',proto:'RMCNapalmB',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,fireEntity:'RMCTileFireGreen',fireSpread:true,available:false,unavailableReason:'Найден в закрытом flamer tank.'},
+  napalm_x:{name:'Напалм X',proto:'RMCNapalmX',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,fireEntity:'RMCTileFireBlue',available:false,unavailableReason:'Найден в закрытом flamer tank.'},
+  napalm_e:{name:'Напалм E',proto:'RMCNapalmE',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,fireEntity:'RMCTileFireNapalmE',firePenetrating:true,available:false,unavailableReason:'Penetrating-fire топливо; штатный источник свободного реагента для OT не подтверждён.'},
+  napalm_ex:{name:'Напалм EX',proto:'RMCNapalmEX',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,fireEntity:'RMCTileFireNapalmEX',firePenetrating:true,available:false,unavailableReason:'Penetrating-fire топливо; штатный источник свободного реагента для OT не подтверждён.'},
+  r189:{name:'R189',proto:'RMCR189',group:'Недоступные / спорные',p:0,f:0,i:.45,r:.06,d:.75,fireEntity:'RMCTileFireR189',firePenetrating:true,available:false,unavailableReason:'Penetrating-fire топливо; штатный источник свободного реагента для OT не подтверждён.'},
 };
 
 export const STOCKED = new Set(['oxygen','sulfuric_acid','water','polytrinic','ammonia','methane','hydrogen','welding_fuel']);

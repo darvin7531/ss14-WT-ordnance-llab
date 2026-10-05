@@ -13,7 +13,7 @@ const root=document.querySelector('#view');
 
 function updateNav(route){
   document.querySelectorAll('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===route));
-  document.querySelector('#buildBadge').textContent=`build ${SOURCE.shortCommit}`;
+  document.querySelector('#buildBadge').textContent=`v${SOURCE.appVersion||'12'} · ${SOURCE.shortCommit}`;
 }
 function render(){const route=currentRoute();updateNav(route);views[route](root);window.scrollTo({top:0,behavior:'instant'});}
 subscribe(render);

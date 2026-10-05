@@ -1,0 +1,8 @@
+{
+  "name": "ss14-wt-ordnance-llab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/smoke.mjs"
+  }
+}
