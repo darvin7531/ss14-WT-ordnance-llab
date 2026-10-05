@@ -72,5 +72,5 @@ export function renderCombat(root){
   root.querySelector('#genericShield').onchange=e=>setState({genericShield:Math.max(0,Number(e.target.value)||0)});
   root.querySelector('#classShield')?.addEventListener('change',e=>setState({classShield:e.target.checked}));
   root.querySelector('#shardHits').oninput=e=>setState({shardHits:Number(e.target.value)});
-  root.querySelectorAll('.heat-cell[data-x]').forEach(b=>b.onclick=()=>setState({target:{x:Number(b.dataset.x),y:Number(b.dataset.y)}});
+  root.querySelectorAll('.heat-cell[data-x]').forEach(b=>b.onclick=()=>setState({target:{x:Number(b.dataset.x),y:Number(b.dataset.y)}}));
 }
