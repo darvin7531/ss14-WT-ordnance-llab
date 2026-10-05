@@ -30,6 +30,7 @@ export function calculateStats(casingId, mix, {blastDampener=false, vesselParts=
   const rows = normalizeMix(mix);
   let powerRaw=f32(0), falloffRaw=f32(casing.baseFalloff);
   let fireIntensityRaw=f32(0), fireRadiusRaw=f32(0), fireDurationRaw=f32(0);
+  let colorR=0,colorG=0,colorB=0,colorWeight=0;
   let ironTotal=0;
 
   for(const {chem,u} of rows){
@@ -40,6 +41,11 @@ export function calculateStats(casingId, mix, {blastDampener=false, vesselParts=
     fireIntensityRaw=f32(fireIntensityRaw + f32(q*f32(c.i)));
     fireRadiusRaw=f32(fireRadiusRaw + f32(q*f32(c.r)));
     fireDurationRaw=f32(fireDurationRaw + f32(q*f32(c.d)));
+    if(c.burnColor && c.burnWeight>0){
+      const rgb=hexToRgb(c.burnColor);
+      const w=Math.max(u,1)*c.burnWeight;
+      colorR+=rgb.r*w;colorG+=rgb.g*w;colorB+=rgb.b*w;colorWeight+=w;
+    }
     if(c.shrapnel) ironTotal += u;
   }
 
@@ -77,13 +83,14 @@ export function calculateStats(casingId, mix, {blastDampener=false, vesselParts=
   };
   const fireShape = fireActual.intensity>30 && casing.allowStarShape ? 'star' : (fireActual.intensity>0?'diamond':'none');
   const fireRayRange = fireShape==='star' ? Math.min(roundToEven(f32(fireRadius*1.5)), Math.trunc(casing.fire.r[1])) : 0;
+  const fireColor=colorWeight>0?rgbToHex(colorR/colorWeight,colorG/colorWeight,colorB/colorWeight):null;
 
   return {
     casingId,casing,rows,volume:rows.reduce((a,x)=>a+x.u,0),
     powerRaw,power,falloffRaw,falloffBeforeDamp,falloff,blastDampener,
     shards,ironTotal,
     fireIntensityRaw,fireRadiusRaw,fireDurationRaw,
-    fireIntensity,fireRadius,fireDuration,fireActual,fireShape,fireRayRange,
+    fireIntensity,fireRadius,fireDuration,fireActual,fireShape,fireRayRange,fireColor,
   };
 }
 
@@ -95,6 +102,16 @@ export function engineParams(stats){
   const calcRadius=f32(Math.max(0,f32(radiusParameter-1)));
   const totalIntensity=f32(Math.PI/3*slope*Math.pow(calcRadius,3));
   return {totalIntensity,slope,maxIntensity,radiusParameter,stepSize:f32(slope/2)};
+}
+
+function hexToRgb(hex){
+  const h=hex.replace('#','');
+  const v=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h.slice(0,6),16);
+  return {r:(v>>16)&255,g:(v>>8)&255,b:v&255};
+}
+function rgbToHex(r,g,b){
+  const h=n=>Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,'0');
+  return '#'+h(r)+h(g)+h(b);
 }
 
 export function packFinalBeakers(casingId,mix){

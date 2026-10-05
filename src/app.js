@@ -5,9 +5,10 @@ import { renderQuick } from './views/quick.js';
 import { renderBuilder } from './views/builder.js';
 import { renderCombat } from './views/combat.js';
 import { renderChemistry } from './views/chemistry.js';
+import { renderReagents } from './views/reagents.js';
 import { renderReference } from './views/reference.js';
 
-const views={quick:renderQuick,builder:renderBuilder,combat:renderCombat,chemistry:renderChemistry,reference:renderReference};
+const views={quick:renderQuick,builder:renderBuilder,combat:renderCombat,chemistry:renderChemistry,reagents:renderReagents,reference:renderReference};
 const root=document.querySelector('#view');
 
 function updateNav(route){

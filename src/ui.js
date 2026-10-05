@@ -1,6 +1,8 @@
 import { CASINGS, CHEMS, PRESETS } from './data.js';
 import { calculateStats, engineParams, fmt, packFinalBeakers } from './engine/ordnance.js';
 import { simulateOpenGrid, maxCardinalReach } from './engine/explosion.js';
+import { analyzeIngredients } from './engine/ingredients.js';
+import { CHEM_DETAILS, effectParts } from './chem-info.js';
 
 export function escapeHtml(v=''){
   return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -28,6 +30,7 @@ export function statStrip(state){
     ${metric('Охват',`${maxCardinalReach(sim)} тайл.`,'по прямой, open-grid')}
     ${metric('Осколки',fmt(stats.shards),'25 Piercing / AP20')}
     ${metric('Огонь',stats.fireActual.intensity?`${stats.fireActual.intensity}/${stats.fireActual.radius}/${stats.fireActual.duration}`:'—','int / radius / sec')}
+    ${metric('Цвет',stats.fireColor?`<span class="metric-color"><i style="background:${stats.fireColor}"></i>${stats.fireColor}</span>`:'—','взвешенный BurnColor')}
   </div>`;
 }
 
@@ -75,4 +78,37 @@ export function heatmapHtml(sim,{selected={x:2,y:0},size=9,clickable=true,showDa
     }
   }
   return `<div class="heat-wrap"><div class="heat-caption"><span>Эпицентр — ✦</span><span>${showDamageFor?'число = урон цели':'число = raw blast damage'}</span></div><div class="heat-grid" style="--n:${lim*2+1}">${cells.join('')}</div></div>`;
+}
+
+
+export function ingredientBreakdown(state,{title='Зачем здесь каждый компонент'}={}){
+  const rows=analyzeIngredients(state.casing,state.mix,{blastDampener:state.blastDampener});
+  return `<section class="panel ingredient-panel">
+    <div class="panel-head">
+      <div><span class="eyebrow">разбор смеси</span><h2>${title}</h2><p>Сверху — что реагент умеет в принципе. Ниже — что он <b>реально меняет именно в этой смеси</b> после cap, min Falloff и целочисленного fire.</p></div>
+      <a class="text-link" href="#/reagents">Полный справочник реагентов →</a>
+    </div>
+    <div class="ingredient-grid">
+      ${rows.map(x=>{
+        const d=CHEM_DETAILS[x.id]||{};
+        const eff=[];
+        if(Math.abs(x.effective.power)>1e-6)eff.push(`Power +${fmt(x.effective.power)}`);
+        if(Math.abs(x.effective.falloff)>1e-6)eff.push(`Falloff −${fmt(x.effective.falloff)}`);
+        if(Math.abs(x.effective.intensity)>1e-6)eff.push(`Fire I ${x.effective.intensity>0?'+':''}${fmt(x.effective.intensity)}`);
+        if(Math.abs(x.effective.radius)>1e-6)eff.push(`Fire R ${x.effective.radius>0?'+':''}${fmt(x.effective.radius)}`);
+        if(Math.abs(x.effective.duration)>1e-6)eff.push(`Fire D ${x.effective.duration>0?'+':''}${fmt(x.effective.duration)}`);
+        if(Math.abs(x.effective.shards)>1e-6)eff.push(`осколки +${fmt(x.effective.shards)}`);
+        const status=x.usefulness==='useful'?'useful':x.usefulness==='partial'?'partial':x.usefulness==='cosmetic'?'cosmetic':'wasted';
+        const statusText={useful:'работает полностью',partial:'часть уходит в cap',cosmetic:'в основном косметика',wasted:'боевого вклада нет'}[status];
+        return `<article class="ingredient-card ${status}">
+          <div class="ingredient-head"><div><b>${x.chem.name}</b><small>${fmt(x.u)}u · ${d.role||'реагент'}</small></div><span class="ingredient-status">${statusText}</span></div>
+          <p>${d.summary||''}</p>
+          <div class="effect-chips">${effectParts(x.id).map(e=>`<span class="effect-chip ${e.tone}">${e.label}</span>`).join('')}</div>
+          <div class="actual-effect"><span>В этой смеси:</span><b>${eff.length?eff.join(' · '):'итоговые боевые параметры не меняет'}</b></div>
+          ${x.notes.length?`<div class="ingredient-notes">${x.notes.map(n=>`<div>• ${n}</div>`).join('')}</div>`:''}
+          <div class="why"><b>Смысл:</b> ${d.how||''}</div>
+        </article>`;
+      }).join('')}
+    </div>
+  </section>`;
 }

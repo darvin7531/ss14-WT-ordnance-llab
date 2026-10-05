@@ -9,3 +9,59 @@
 @media(max-width:1220px){.preset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics-grid.compact{grid-template-columns:repeat(4,minmax(0,1fr))}.builder-layout,.combat-layout{grid-template-columns:1fr}.sticky-panel{position:static}}
 @media(max-width:860px){.sidebar{transform:translateX(-102%);transition:.18s;width:min(82vw,280px)}body.nav-open .sidebar{transform:none}.mobile-bar{display:flex;position:sticky;top:0;z-index:15;background:rgba(9,13,18,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);height:54px;align-items:center;padding:0 12px;gap:10px}.mobile-bar b{display:block;font-size:12px}.mobile-bar small{display:block;color:#718496;font-size:8px}.menu-btn{width:35px;height:35px;border:1px solid var(--line);border-radius:9px;background:#111a23;color:#cbd7df}.view{margin-left:0;padding:18px 12px 50px}.page-head{margin-top:4px}.quick-columns,.two-col{grid-template-columns:1fr}.source-list{grid-template-columns:1fr}.combat-config{align-items:stretch}.field{min-width:0;flex:1 1 180px}}
 @media(max-width:620px){.page-head{display:block}.page-head>.button,.page-head>.switch{margin-top:10px}.preset-grid{grid-template-columns:1fr}.metrics-grid,.metrics-grid.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.panel-head{display:block}.panel-head>.switch,.panel-head>.pill,.panel-head>.button{margin-top:8px}.casing-tabs{display:grid;grid-template-columns:repeat(3,1fr)}.seg{justify-content:center}.mix-line{grid-template-columns:1fr}.num-control{grid-template-columns:58px 1fr 58px}.icon-btn{height:32px}.beakers{grid-template-columns:1fr}.big-result{grid-template-columns:1fr}.hit-row{grid-template-columns:1fr 1fr}.engine-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* v12.1 — reagent explanations / ingredient usefulness */
+.metric-color{display:inline-flex;align-items:center;gap:7px;font-size:14px}
+.metric-color i{width:18px;height:18px;border-radius:5px;border:1px solid rgba(255,255,255,.18);box-shadow:0 0 12px rgba(255,255,255,.08)}
+.ingredient-panel{margin-top:14px}
+.ingredient-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ingredient-card{border:1px solid #2a3a48;background:#0b141c;border-radius:12px;padding:11px;min-width:0}
+.ingredient-card.useful{border-color:#315844}
+.ingredient-card.partial{border-color:#65572f}
+.ingredient-card.cosmetic{border-color:#4f466a}
+.ingredient-card.wasted{border-color:#6b3f3d}
+.ingredient-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.ingredient-head b{font-size:12px}
+.ingredient-head small{display:block;color:#718597;font-size:9px;margin-top:2px}
+.ingredient-status{font-size:8px;border:1px solid #334658;border-radius:999px;padding:3px 6px;white-space:nowrap;color:#a9bac8}
+.ingredient-card.useful .ingredient-status{border-color:#35684b;color:#91d7a8}
+.ingredient-card.partial .ingredient-status{border-color:#6d5e34;color:#dfc47f}
+.ingredient-card.cosmetic .ingredient-status{border-color:#655581;color:#c7b3ef}
+.ingredient-card.wasted .ingredient-status{border-color:#744340;color:#efa29c}
+.ingredient-card>p{font-size:9px;color:#8294a5;line-height:1.45;margin:7px 0}
+.effect-chips{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0}
+.effect-chip{font-size:8px;border:1px solid #30404e;background:#0a1118;border-radius:999px;padding:3px 6px;color:#9eafbc}
+.effect-chip.blast{border-color:#365e7b;color:#9fd5f5}
+.effect-chip.good{border-color:#356347;color:#91d7a8}
+.effect-chip.warn{border-color:#6a5832;color:#e0c27e}
+.effect-chip.fire{border-color:#75493c;color:#f0a98f}
+.effect-chip.frag{border-color:#6b4b57;color:#e7aabb}
+.effect-chip.color{border-color:#5b4d73;color:#ccb7ed}
+.effect-chip.muted{color:#738494}
+.actual-effect{border-top:1px solid #1f2b35;margin-top:8px;padding-top:8px}
+.actual-effect span{display:block;color:#6f8294;font-size:8px;text-transform:uppercase;letter-spacing:.06em}
+.actual-effect b{display:block;font-size:10px;margin-top:3px;color:#d4e1ea;line-height:1.4}
+.ingredient-notes{margin-top:7px;padding:7px 8px;border:1px dashed #514633;border-radius:8px;background:#17140e;color:#d5bc82;font-size:8px;line-height:1.5}
+.why{margin-top:7px;color:#91a3b2;font-size:9px;line-height:1.45}
+.why b{color:#cbd9e4}
+.chem-toolbar{display:flex;align-items:end;gap:14px;flex-wrap:wrap}
+.field.grow{flex:1 1 320px}
+.chem-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.chem-card{border:1px solid #283946;background:linear-gradient(180deg,#0e1720,#0b131a);border-radius:13px;padding:13px;min-width:0}
+.chem-card.chem-hidden{border-style:dashed;opacity:.86}
+.chem-card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.chem-card h3{margin:4px 0 2px;font-size:14px}
+.chem-card code{font-size:8px;color:#708497}
+.chem-role{display:inline-flex;font-size:8px;border:1px solid #365269;border-radius:999px;padding:3px 6px;color:#9bcce9}
+.chem-summary{color:#a5b5c2;font-size:10px;line-height:1.5;margin:9px 0}
+.chem-explain{border-top:1px solid #1f2b35;padding-top:8px;margin-top:8px}
+.chem-explain b,.chem-use-grid b{font-size:9px;color:#d1dde6}
+.chem-explain p,.chem-use-grid p{font-size:9px;color:#8193a3;line-height:1.45;margin:4px 0 0}
+.chem-use-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.chem-use-grid>div{border:1px solid #22313d;border-radius:9px;padding:8px;background:#091119}
+.chem-source{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-top:1px solid #1e2a34;margin-top:9px;padding-top:8px;font-size:8px;color:#6f8191}
+.chem-source b{font-size:9px;color:#b8c7d3}
+.chem-source small{font-size:8px;color:#728494}
+.color-dot{width:14px;height:14px;border-radius:4px;border:1px solid rgba(255,255,255,.18);margin-left:auto}
+@media(max-width:900px){.ingredient-grid,.chem-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.chem-use-grid{grid-template-columns:1fr}.ingredient-head{display:block}.ingredient-status{display:inline-flex;margin-top:6px}}

@@ -1,6 +1,6 @@
 import { state, setState, loadPreset } from '../state.js';
 import { CASINGS, CHEMS, PRESETS } from '../data.js';
-import { casingTabs, presetCards, statStrip, mixtureText, currentBundle } from '../ui.js';
+import { casingTabs, presetCards, statStrip, mixtureText, currentBundle, ingredientBreakdown } from '../ui.js';
 import { expandProduction, productionSteps, safetyNotes } from '../engine/chemistry.js';
 import { fmt, packFinalBeakers } from '../engine/ordnance.js';
 
@@ -42,6 +42,7 @@ export function renderQuick(root){
       ${statStrip(state)}
       <div class="callout warn"><b>Важно:</b> «охват» теперь считается open-grid алгоритмом ExplosionSystem, а не как Power/Falloff. Стены и гермозатворы могут сильно изменить реальный рисунок.</div>
     </section>
+    ${ingredientBreakdown(state)}
     ${shortRecipe()}`;
 
   root.querySelectorAll('[data-casing]').forEach(b=>b.onclick=()=>setState({casing:b.dataset.casing,mix:(PRESETS.find(p=>p.casing===b.dataset.casing&&p.recommended)||PRESETS.find(p=>p.casing===b.dataset.casing))?Object.entries((PRESETS.find(p=>p.casing===b.dataset.casing&&p.recommended)||PRESETS.find(p=>p.casing===b.dataset.casing)).mix).map(([chem,u])=>({chem,u})):[]}));

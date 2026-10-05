@@ -1,6 +1,6 @@
 import { state, setState, setMix } from '../state.js';
 import { CASINGS, CHEMS } from '../data.js';
-import { casingTabs, statStrip, heatmapHtml, currentBundle } from '../ui.js';
+import { casingTabs, statStrip, heatmapHtml, currentBundle, ingredientBreakdown } from '../ui.js';
 import { calculateStats, engineParams, fmt, packFinalBeakers } from '../engine/ordnance.js';
 import { analyzeSolutionHazards } from '../engine/chemistry.js';
 
@@ -42,7 +42,8 @@ export function renderBuilder(root){
         ${statsWithVessels.fireActual.intensity?`<div class="callout info"><b>Огонь:</b> сервер реально передаст <b>${statsWithVessels.fireActual.intensity} / ${statsWithVessels.fireActual.radius} / ${statsWithVessels.fireActual.duration}</b>. ${statsWithVessels.fireShape==='star'?`При Intensity > 30 этот корпус создаст star/line shape (ray range ${statsWithVessels.fireRayRange}).`:'Форма — ромб.'}</div>`:''}
       </section>
     </div>
-  </div>`;
+  </div>
+  ${ingredientBreakdown(state,{title:'Что в текущей смеси полезно, а что уже упёрлось в cap'})}`;
 
   root.querySelectorAll('[data-casing]').forEach(b=>b.onclick=()=>setState({casing:b.dataset.casing}));
   root.querySelector('#dampToggle').onchange=e=>setState({blastDampener:e.target.checked});
