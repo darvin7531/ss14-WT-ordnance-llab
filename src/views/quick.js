@@ -22,7 +22,7 @@ function shortRecipe(){
     </section>
     <section class="panel">
       <div class="panel-head"><div><span class="eyebrow">2. Изготовь</span><h2>Маршрут на ${count} шт.</h2></div><a class="text-link" href="#/chemistry">подробно →</a></div>
-      <div class="timeline">${steps.slice(0,6).map((s,i)=>`<div class="timeline-row"><span class="stepnum">${i+1}</span><div><b>${CHEMS[s.id]?.name||s.id} — ${fmt(s.total)} ед.</b><small>${s.type==='machine'?`Морозилка OT · ${Math.round(s.seconds/60*10)/10} мин · ${s.containers.length} ёмк.`:(s.batches.length>1?`${s.batches.length} партии`:s.recipe.note)}</small></div></div>`).join('')}${steps.length>6?`<div class="more">+ ещё ${steps.length-6} шаг(а) — открой «Химия»</div>`:''}</div>
+      <div class="timeline">${steps.slice(0,6).map((s,i)=>`<div class="timeline-row"><span class="stepnum">${i+1}</span><div><b>${CHEMS[s.id]?.name||s.id} — ${fmt(s.total)} ед.</b><small>${s.type==='machine'?`Морозилка OT · ≈ ${Math.round(s.seconds/60*10)/10} мин · ${s.loads.length} загрузок`:(s.batches.length>1?`${s.batches.length} партии`:s.recipe.note)}</small></div></div>`).join('')}${steps.length>6?`<div class="more">+ ещё ${steps.length-6} шаг(а) — открой «Химия»</div>`:''}</div>
     </section>
   </div>
   ${safety.length?`<div class="alerts">${safety.map(n=>`<div class="alert ${n.tone}">${n.text}</div>`).join('')}</div>`:''}
