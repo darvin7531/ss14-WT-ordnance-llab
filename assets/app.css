@@ -65,3 +65,27 @@
 .color-dot{width:14px;height:14px;border-radius:4px;border:1px solid rgba(255,255,255,.18);margin-left:auto}
 @media(max-width:900px){.ingredient-grid,.chem-grid{grid-template-columns:1fr}}
 @media(max-width:620px){.chem-use-grid{grid-template-columns:1fr}.ingredient-head{display:block}.ingredient-status{display:inline-flex;margin-top:6px}}
+
+
+/* v12.3 — planning a whole batch without changing one-charge ballistics */
+.batch-picker{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.batch-picker-text{max-width:670px}
+.batch-picker h2{font-size:18px;margin:3px 0 5px}
+.batch-picker p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.batch-picker-right{min-width:245px}
+.batch-picker-right>label{display:block;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#8298a9;margin-bottom:6px}
+.batch-picker-right>small{display:block;color:#718798;font-size:9px;margin-top:6px}
+.batch-counter{display:grid;grid-template-columns:40px 36px 72px 36px 40px;gap:4px;align-items:center}
+.batch-counter button,.batch-counter input{height:36px;border-radius:8px;border:1px solid #344759;background:#0b151e;color:#dcebf4;text-align:center;font-weight:750}
+.batch-counter button{cursor:pointer}
+.batch-counter button:hover:not(:disabled){border-color:#6fb4e2;background:#152c3d}
+.batch-counter button:disabled{opacity:.38;cursor:not-allowed}
+.batch-counter input{min-width:0;width:100%;font-size:16px;appearance:textfield;-moz-appearance:textfield}
+.batch-counter input::-webkit-inner-spin-button,.batch-counter input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.batch-counter input:focus{outline:2px solid #5285ad;outline-offset:1px}
+.batch-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:0 0 14px}
+.batch-overview>div{border:1px solid #284156;background:#0d1924;border-radius:12px;padding:12px}
+.batch-overview span,.batch-overview small{display:block;color:#7c93a6;font-size:9px}
+.batch-overview b{display:block;color:#e0eef8;font-size:21px;margin:5px 0 2px;overflow-wrap:anywhere}
+@media(max-width:1000px){.batch-overview{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.batch-picker{display:block}.batch-picker-right{margin-top:14px;min-width:0}.batch-counter{grid-template-columns:40px 36px minmax(55px,1fr) 36px 40px}.batch-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.batch-overview b{font-size:17px}}
