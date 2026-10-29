@@ -1,6 +1,7 @@
 import { state, setState, setMix } from '../state.js';
 import { CASINGS, CHEMS } from '../data.js';
-import { casingTabs, statStrip, heatmapHtml, currentBundle, ingredientBreakdown } from '../ui.js';
+import { casingTabs, statStrip, heatmapHtml, currentBundle, ingredientBreakdown, productionCountPicker, bindProductionCount } from '../ui.js';
+import { planProduction } from '../engine/chemistry.js';
 import { calculateStats, engineParams, fmt, packFinalBeakers } from '../engine/ordnance.js';
 import { analyzeSolutionHazards } from '../engine/chemistry.js';
 
@@ -19,6 +20,7 @@ function mixEditor(){
 
 export function renderBuilder(root){
   const bundle=currentBundle(state);
+  const plan=planProduction(state.mix,{count:state.productionCount,useStocked:state.useStocked});
   const beakers=packFinalBeakers(state.casing,state.mix);
   const statsWithVessels=calculateStats(state.casing,state.mix,{blastDampener:state.blastDampener,vesselParts:beakers});
   const engine=engineParams(statsWithVessels);
@@ -26,11 +28,16 @@ export function renderBuilder(root){
   const payloadHazards=beakers.flatMap(v=>analyzeSolutionHazards(v.parts,v.name));
   root.innerHTML=`
   <div class="page-head"><div><span class="eyebrow">расширенный режим</span><h1>Конструктор заряда</h1><p>Редактируй жидкость вручную. Справа — именно параметры, которые уходят в ExplosionSystem.</p></div><a class="button ghost" href="#/quick">← Простой режим</a></div>
+  ${productionCountPicker(state.productionCount)}
   <div class="two-col builder-layout">
     <div>
       <section class="panel"><div class="panel-head"><div><span class="eyebrow">Корпус</span><h2>${CASINGS[state.casing].name}</h2></div><label class="switch"><input id="dampToggle" type="checkbox" ${state.blastDampener?'checked':''}><span></span><b>Blast dampener</b></label></div>${casingTabs(state.casing)}</section>
       <section class="panel"><div class="panel-head"><div><span class="eyebrow">Состав</span><h2>${fmt(statsWithVessels.volume)} / ${statsWithVessels.casing.volume} ед.</h2></div><span class="pill ${statsWithVessels.volume>statsWithVessels.casing.volume?'bad':''}">${statsWithVessels.volume>statsWithVessels.casing.volume?'ПЕРЕПОЛНЕНИЕ':'объём OK'}</span></div>${mixEditor()}</section>
-      <section class="panel"><div class="panel-head"><div><span class="eyebrow">Упаковка</span><h2>Финальные мензурки</h2></div></div><div class="beakers">${beakers.map(v=>`<div class="beaker"><div class="beaker-title"><b>${v.name}</b><span>${fmt(v.used)} / ${v.capacity}</span></div>${v.parts.map(p=>`<div class="beaker-part"><span>${CHEMS[p.chem]?.name||p.chem}</span><b>${fmt(p.u)}</b></div>`).join('')}</div>`).join('')}</div><div class="callout info">Железо группируется первым. Сервер считает осколки как <code>(int)(qty × 0.25)</code> для каждой записи раствора, поэтому дробить железо между мензурками невыгодно.</div>${payloadHazards.length?`<div class="alerts">${payloadHazards.map(h=>`<div class="alert ${h.tone}">${h.text}</div>`).join('')}</div>`:''}</section>
+      <section class="panel"><div class="panel-head"><div><span class="eyebrow">Вся партия</span><h2>Состав на ${plan.count} изделий</h2><p>Конструктор выше задаёт рецепт одной гранаты / боеголовки.</p></div><a class="text-link" href="#/chemistry">Сырьё и шаги →</a></div>
+        <div class="need-list">${plan.totalMix.map(row=>`<div class="need-row"><span>${CHEMS[row.chem]?.name||row.chem}</span><b>${fmt(row.u)} ед.</b></div>`).join('')||'<div class="empty">Смесь пуста.</div>'}</div>
+        <div class="callout info">Всего ${fmt(plan.totalVolume)} ед. раствора · ${beakers.length} мензурок на изделие · ${beakers.length*plan.count} заполнений на партию.</div>
+      </section>
+      <section class="panel"><div class="panel-head"><div><span class="eyebrow">Упаковка · на 1 изделие</span><h2>Финальные мензурки</h2></div></div><div class="beakers">${beakers.map(v=>`<div class="beaker"><div class="beaker-title"><b>${v.name}</b><span>${fmt(v.used)} / ${v.capacity}</span></div>${v.parts.map(p=>`<div class="beaker-part"><span>${CHEMS[p.chem]?.name||p.chem}</span><b>${fmt(p.u)}</b></div>`).join('')}</div>`).join('')}</div><div class="callout info">Железо группируется первым. Сервер считает осколки как <code>(int)(qty × 0.25)</code> для каждой записи раствора, поэтому дробить железо между мензурками невыгодно.</div>${payloadHazards.length?`<div class="alerts">${payloadHazards.map(h=>`<div class="alert ${h.tone}">${h.text}</div>`).join('')}</div>`:''}</section>
     </div>
     <div>
       <section class="panel sticky-panel"><div class="panel-head"><div><span class="eyebrow">Результат</span><h2>Параметры сервера</h2></div></div>${statStrip({...state})}
@@ -47,6 +54,7 @@ export function renderBuilder(root){
 
   root.querySelectorAll('[data-casing]').forEach(b=>b.onclick=()=>setState({casing:b.dataset.casing}));
   root.querySelector('#dampToggle').onchange=e=>setState({blastDampener:e.target.checked});
+  bindProductionCount(root,count=>setState({productionCount:count}));
   root.querySelectorAll('.mix-line').forEach(line=>{
     const idx=Number(line.dataset.index);
     line.querySelector('.chem-select').onchange=e=>{const m=state.mix.map(x=>({...x}));m[idx].chem=e.target.value;setMix(m);};
