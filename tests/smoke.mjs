@@ -57,4 +57,15 @@ const hugePlan=planProduction([{chem:'anfo',u:120}],{count:50,useStocked:true});
 assert.equal(hugePlan.steps.find(s=>s.id==='anfo').batches.length,50);
 assert(hugePlan.notes.find(s=>s.text.includes('50 × 120')));
 
+// Industry Freezer: не более 3 ёмкостей с ограничением 60u на одну загрузку.
+const smallFreezer=planProduction([{chem:'paraformaldehyde',u:54}],{count:1});
+const smallLoad=smallFreezer.steps.find(s=>s.id==='paraformaldehyde');
+assert.deepEqual(smallLoad.loads[0].containers,[18,18,18]);
+assert.equal(smallLoad.seconds,120);
+const largeFreezer=planProduction([{chem:'paraformaldehyde',u:3}],{count:100});
+const freezerStep=largeFreezer.steps.find(s=>s.id==='paraformaldehyde');
+assert.equal(freezerStep.total,300);
+assert.equal(freezerStep.loads.length,2);
+assert(freezerStep.loads.every(l=>l.containers.length<=3&&l.containers.every(u=>u<=60)));
+
 console.log('smoke ok');
