@@ -3,7 +3,7 @@ export const SOURCE = {
   commit: 'a85baeafd79b5c07fd64aad1196a6258dd8b6e25',
   shortCommit: 'a85baeaf',
   checkedAt: '2026-10-05',
-  appVersion: '12.2',
+  appVersion: '12.3',
 };
 
 export const CASINGS = {

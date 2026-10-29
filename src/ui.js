@@ -3,9 +3,36 @@ import { calculateStats, engineParams, fmt, packFinalBeakers } from './engine/or
 import { simulateOpenGrid, maxCardinalReach } from './engine/explosion.js';
 import { analyzeIngredients } from './engine/ingredients.js';
 import { CHEM_DETAILS, effectParts, fireEntityLabel } from './chem-info.js';
+import { clampProductionCount, MAX_PRODUCTION_COUNT } from './engine/chemistry.js';
 
 export function escapeHtml(v=''){
   return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
+export function productionCountPicker(value){
+  const n=clampProductionCount(value);
+  return `<section class="panel batch-picker">
+    <div class="batch-picker-text"><span class="eyebrow">планирование партии</span><h2>Сколько боеприпасов изготовить?</h2><p>Рецепт, мощность и мензурки считаются <b>на один заряд</b>, а сырьё и производственные шаги — на всю партию.</p></div>
+    <div class="batch-picker-right">
+      <label for="productionCount">Количество изделий</label>
+      <div class="batch-counter">
+        <button type="button" data-production-delta="-5" ${n===1?'disabled':''} aria-label="Уменьшить на 5">−5</button>
+        <button type="button" data-production-delta="-1" ${n===1?'disabled':''} aria-label="Уменьшить на 1">−</button>
+        <input id="productionCount" type="number" inputmode="numeric" min="1" max="${MAX_PRODUCTION_COUNT}" step="1" value="${n}" aria-label="Количество изделий в партии">
+        <button type="button" data-production-delta="1" ${n===MAX_PRODUCTION_COUNT?'disabled':''} aria-label="Увеличить на 1">+</button>
+        <button type="button" data-production-delta="5" ${n===MAX_PRODUCTION_COUNT?'disabled':''} aria-label="Увеличить на 5">+5</button>
+      </div><small>От 1 до ${MAX_PRODUCTION_COUNT} · не влияет на симулятор боя</small>
+    </div>
+  </section>`;
+}
+
+export function bindProductionCount(root,onChange){
+  const input=root.querySelector('#productionCount');
+  if(!input)return;
+  input.addEventListener('change',()=>onChange(clampProductionCount(input.value)));
+  root.querySelectorAll('[data-production-delta]').forEach(button=>{
+    button.addEventListener('click',()=>onChange(clampProductionCount(Number(input.value)+Number(button.dataset.productionDelta))));
+  });
 }
 
 export function metric(label,value,hint='',tone=''){

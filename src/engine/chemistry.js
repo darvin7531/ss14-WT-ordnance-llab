@@ -1,6 +1,50 @@
 import { CHEMS, RECIPES, STOCKED, SENSITIVE } from '../data.js';
+import { fmt } from './ordnance.js';
 
 const ceilQ=(v,q)=>q>0?Math.ceil((v-1e-9)/q)*q:v;
+export const MAX_PRODUCTION_COUNT=100;
+
+// Количество изделий влияет на план производства, но не на характеристики отдельного заряда.
+export function clampProductionCount(value){
+  const n=Number(value);
+  return Number.isFinite(n)?Math.max(1,Math.min(MAX_PRODUCTION_COUNT,Math.trunc(n))):1;
+}
+
+export function scaleProductionMix(mix,count=1){
+  const n=clampProductionCount(count);
+  const amounts=new Map();
+  for(const row of mix||[]){
+    if(!CHEMS[row.chem]||CHEMS[row.chem].available===false)continue;
+    const u=Number(row.u);
+    if(!Number.isFinite(u)||u<=0)continue;
+    amounts.set(row.chem,(amounts.get(row.chem)||0)+u*n);
+  }
+  return [...amounts].map(([chem,u])=>({chem,u}));
+}
+
+// Крупные партии показываем компактно, не генерируя тысячи строк рецептов.
+export function summarizeBatches(batches){
+  const groups=[];
+  for(const amount of batches){
+    const last=groups.at(-1);
+    if(last&&Math.abs(last.amount-amount)<1e-8)last.count++;
+    else groups.push({amount,count:1});
+  }
+  return groups.map(g=>g.count>1?`${g.count} × ${fmt(g.amount)}`:`${fmt(g.amount)}`).join(' + ');
+}
+
+export function planProduction(mix,{count=1,useStocked=true}={}){
+  const quantity=clampProductionCount(count);
+  const totalMix=scaleProductionMix(mix,quantity);
+  const expanded=expandProduction(totalMix,{useStocked});
+  return {
+    count:quantity,totalMix,
+    totalVolume:totalMix.reduce((sum,row)=>sum+row.u,0),
+    expanded,
+    steps:productionSteps(expanded),
+    notes:safetyNotes(expanded),
+  };
+}
 
 export function splitBatches(total,limit){
   if(limit<=0) return [];
@@ -43,18 +87,31 @@ export function productionSteps(expanded){
     const recipe=RECIPES[id];
     const batches=recipe.batch?splitBatches(total,recipe.batch):[total];
     if(recipe.machine==='freezer'){
-      // Machine consumes 3+3 →3 every 20s per container, max 3 containers each interval.
-      // Для минимального времени используем до трёх ёмкостей параллельно даже на объёмах < 60u.
-      // Например 54u = 18/18/18 → 6 циклов → 120 секунд вместо 360 секунд в одной ёмкости.
-      const containers=Math.min(3,Math.max(1,Math.ceil(total/3)));
-      const per=[];
-      let left=total;
-      for(let i=0;i<containers;i++){
-        const share=Math.ceil((left/(containers-i))/3)*3;
-        const amount=Math.min(left,share); per.push(amount); left-=amount;
+      // Одновременно обрабатываются до 3 мензурок; каждая ограничена batch (60u).
+      // На больших объёмах нужны несколько загрузок, а не три безразмерные ёмкости.
+      const capacity=recipe.batch||60;
+      const loads=[];
+      let remaining=total;
+      while(remaining>1e-9){
+        const loadTotal=Math.min(remaining,capacity*3);
+        const count=Math.min(3,Math.max(1,Math.ceil(loadTotal/3)));
+        const containers=[];
+        let left=loadTotal;
+        for(let i=0;i<count;i++){
+          const share=Math.min(capacity,Math.ceil((left/(count-i))/3)*3);
+          const amount=Math.min(left,share);
+          if(amount>1e-9)containers.push(amount);
+          left-=amount;
+        }
+        const seconds=Math.max(...containers.map(amount=>Math.ceil(amount/3)))*20;
+        loads.push({containers,seconds});
+        remaining-=loadTotal;
       }
-      const cycles=Math.max(...per.map(x=>Math.ceil(x/3)));
-      steps.push({id,total,type:'machine',containers:per,seconds:cycles*20,recipe});
+      steps.push({
+        id,total,type:'machine',recipe,
+        containers:loads[0]?.containers||[],loads,
+        seconds:loads.reduce((sum,load)=>sum+load.seconds,0),
+      });
       continue;
     }
     steps.push({id,total,type:'reaction',batches,recipe,sensitive:SENSITIVE[id]||null});
@@ -79,7 +136,7 @@ export function safetyNotes(expanded){
     if(!meta) continue;
     if(meta.safeProduct<=0){notes.push({tone:'danger',text:`${meta.name}: безопасного ненулевого замеса нет.`});continue;}
     const parts=splitBatches(total,meta.safeProduct);
-    if(parts.length>1) notes.push({tone:'warn',text:`${meta.name}: ${total} ед. дели на ${parts.length} партии: ${parts.join(' + ')}. Не смешивай исходники на весь объём сразу.`});
+    if(parts.length>1) notes.push({tone:'warn',text:`${meta.name}: ${total} ед. дели на ${parts.length} партии: ${summarizeBatches(parts)}. Не смешивай исходники на весь объём сразу.`});
     else notes.push({tone:'ok',text:`${meta.name}: ${total} ед. помещаются в одну безопасную партию (до ${meta.safeProduct}).`});
   }
   return notes;
