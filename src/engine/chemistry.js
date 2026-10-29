@@ -87,18 +87,31 @@ export function productionSteps(expanded){
     const recipe=RECIPES[id];
     const batches=recipe.batch?splitBatches(total,recipe.batch):[total];
     if(recipe.machine==='freezer'){
-      // Machine consumes 3+3 →3 every 20s per container, max 3 containers each interval.
-      // Для минимального времени используем до трёх ёмкостей параллельно даже на объёмах < 60u.
-      // Например 54u = 18/18/18 → 6 циклов → 120 секунд вместо 360 секунд в одной ёмкости.
-      const containers=Math.min(3,Math.max(1,Math.ceil(total/3)));
-      const per=[];
-      let left=total;
-      for(let i=0;i<containers;i++){
-        const share=Math.ceil((left/(containers-i))/3)*3;
-        const amount=Math.min(left,share); per.push(amount); left-=amount;
+      // Одновременно обрабатываются до 3 мензурок; каждая ограничена batch (60u).
+      // На больших объёмах нужны несколько загрузок, а не три безразмерные ёмкости.
+      const capacity=recipe.batch||60;
+      const loads=[];
+      let remaining=total;
+      while(remaining>1e-9){
+        const loadTotal=Math.min(remaining,capacity*3);
+        const count=Math.min(3,Math.max(1,Math.ceil(loadTotal/3)));
+        const containers=[];
+        let left=loadTotal;
+        for(let i=0;i<count;i++){
+          const share=Math.min(capacity,Math.ceil((left/(count-i))/3)*3);
+          const amount=Math.min(left,share);
+          if(amount>1e-9)containers.push(amount);
+          left-=amount;
+        }
+        const seconds=Math.max(...containers.map(amount=>Math.ceil(amount/3)))*20;
+        loads.push({containers,seconds});
+        remaining-=loadTotal;
       }
-      const cycles=Math.max(...per.map(x=>Math.ceil(x/3)));
-      steps.push({id,total,type:'machine',containers:per,seconds:cycles*20,recipe});
+      steps.push({
+        id,total,type:'machine',recipe,
+        containers:loads[0]?.containers||[],loads,
+        seconds:loads.reduce((sum,load)=>sum+load.seconds,0),
+      });
       continue;
     }
     steps.push({id,total,type:'reaction',batches,recipe,sensitive:SENSITIVE[id]||null});
