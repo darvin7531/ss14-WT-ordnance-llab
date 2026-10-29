@@ -15,7 +15,16 @@ function updateNav(route){
   document.querySelectorAll('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===route));
   document.querySelector('#buildBadge').textContent=`v${SOURCE.appVersion||'12'} · ${SOURCE.shortCommit}`;
 }
-function render(){const route=currentRoute();updateNav(route);views[route](root);window.scrollTo({top:0,behavior:'instant'});}
+let lastRoute=null;
+function render(){
+  const route=currentRoute();
+  const routeChanged=route!==lastRoute;
+  lastRoute=route;
+  updateNav(route);
+  views[route](root);
+  // Смена количества не должна бросать пользователя к началу длинного рецепта.
+  if(routeChanged) window.scrollTo({top:0,behavior:'instant'});
+}
 subscribe(render);
 onRoute(render);
 
